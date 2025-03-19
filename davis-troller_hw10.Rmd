@@ -1,0 +1,89 @@
+---
+title: "ex 10 mixed effects models"
+output: html_document
+date: "2025-03-17"
+---
+Exercise 10: Mixed effects
+
+This homework assignment is designed to give you practice fitting and interpreting mixed effects models.
+
+We will be using the LexicalData.csv and Items.csv files from the Homework/lexDat folder in the class GitHub repository again.
+
+This data is a subset of the English Lexicon Project database. It provides the reaction times (in milliseconds) of many subjects as they are presented with letter strings and asked to decide, as quickly and as accurately as possible, whether the letter string is a word or not. The Items.csv provides characteristics of the words used, namely frequency (how common is this word?) and length (how many letters?). Unlike in the previous homework, there isn't any missing data in the LexicalData.csv file.
+
+Data courtesy of Balota, D.A., Yap, M.J., Cortese, M.J., Hutchison, K.A., Kessler, B., Loftis, B., Neely, J.H., Nelson, D.L., Simpson, G.B., & Treiman, R. (2007). The English Lexicon Project. Behavior Research Methods, 39, 445-459.
+
+
+
+
+1. Loading and formatting the data (1 point)
+
+Load in data from the LexicalData.csv and Items.csv files. As in the previous homeworks, remove the commas from the reaction times and convert them from strings to numbers. Use left_join to add word characteristics Length and Log_Freq_Hal from Items to LexicalData.
+
+Note: the Freq_HAL variable in Items.csv has a similar formatting issue, using string values with commas. We're not going to worry about fixing this since we're only using Log_Freq_HAL, which is the natural log transformation of Freq_HAL, in this homework.
+```{r}
+
+library(tidyverse)
+lex_data <- read.csv("LexicalData.csv")
+items <- read.csv("Items.csv")
+
+
+clean_df = lex_data
+clean_df$D_RT = gsub(",","",clean_df$D_RT)# want to remove commas gsub
+clean_df$D_RT = as.numeric(clean_df$D_RT) #turn D_RT into number
+
+head(clean_df)
+
+items <- items %>%
+  select(Word, Length, Log_Freq_HAL)
+
+lex_data_clean <- left_join(clean_df, items, by = c("D_Word" = "Word"))%>%
+  drop_na()
+
+head(lex_data_clean)
+```
+
+
+2. Model fitting (4 points)
+First, fit a linear model with Log_Freq_HAL and Length as predictors, and D_RT as the output. Include an interaction term. Use summary() to look at the model output.
+
+
+```{r}
+lmmodel <- lm(D_RT ~ Log_Freq_HAL * Length, data = lex_data_clean)
+summary(lmmodel)
+
+```
+
+Now, install lme4 using install.packages() and then load the library.
+```{r}
+install.packages("lme4")
+library(lme4)
+```
+
+Now fit a mixed effects model that includes the same predictors as the linear model above, as well as random intercepts for Sub_ID (i.e., cases where subject ID shifts the RT mean). Use summary() to look at the model output.
+
+```{r}
+mixed_model <- lmer(D_RT ~ Log_Freq_HAL * Length + (1 | Sub_ID), data = lex_data_clean)
+summary(mixed_model)
+```
+3. Model Assessment (4 point)
+Compare the three t-values for the fixed effects and the mixed effects models. How do they differ, and why?
+Fixed effects:                        Mixed effects:
+log             -3.061                                -4.698
+length          29.175                                36.277
+interaction     -12.528                               -15.239
+
+The mixed effect t-values are all a little more extreme, further away from 0. This is likely the case because the mixed model reduces residual noise. 
+
+Use the Aikaike Information Criterion (AIC) to compare these two models. Which one is better?
+```{r}
+AIC(mixed_model)
+AIC(lmmodel)
+```
+The lower AIC is the better model. Therefore, the mixed model is the better model even after accounting for the complexity of the model. 
+
+
+4. Reflection (1 point)
+What other random effects could be controlled for in this data set?
+
+If data are collected in blocks or trials over time, we could control for learning or fatigue effects as the task continues. 
