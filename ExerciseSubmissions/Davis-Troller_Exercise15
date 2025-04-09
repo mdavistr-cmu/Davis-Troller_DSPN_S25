@@ -1,0 +1,931 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/mdavistr-cmu/Davis-Troller_DSPN_S25/blob/main/ExerciseSubmissions/Davis-Troller_Exercise15\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "a0rUEhseSmbM"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/CoAxLab/Data-Explorations/blob/main/book/exercises/power-analysis-via-simulations.ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "-2W919d2ZXp7"
+      },
+      "source": [
+        "# Exercise 15: Power analyses"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "L4nOzVhyZXqK"
+      },
+      "source": [
+        "This  assignment is designed to give you practice with Monte Carlo methods to conduct power analyses via simulation. You won't need to load in any data for this homework. We will, however, be using parts of the homework from last week."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "9DsyBTB6ZXqN"
+      },
+      "source": [
+        "---\n",
+        "## 1. Simulating data (1 points)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "J1f6MywYhyzN"
+      },
+      "source": [
+        "Pull your `simulate_data()` function from your last homework and add it below.\n",
+        "\n",
+        "As a reminder, this function simulates the relationship between age, word reading experience, and reading comprehension skill.\n",
+        "\n",
+        "`c` is reading comprehension, and `x` is word reading experience."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "install.packages(\"mediation\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "IRfTErOQUeeE",
+        "outputId": "ac58e42d-db62-48dd-bb78-8b6ceed476d2"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "Installing package into ‘/usr/local/lib/R/site-library’\n",
+            "(as ‘lib’ is unspecified)\n",
+            "\n",
+            "also installing the dependencies ‘rbibutils’, ‘checkmate’, ‘Rdpack’, ‘zoo’, ‘gridExtra’, ‘htmlTable’, ‘viridis’, ‘Formula’, ‘minqa’, ‘nloptr’, ‘reformulas’, ‘RcppEigen’, ‘mvtnorm’, ‘sandwich’, ‘lpSolve’, ‘Hmisc’, ‘lme4’\n",
+            "\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 6,
+      "metadata": {
+        "id": "UnBVazYfZXqP",
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 277
+        },
+        "outputId": "fe8e849c-0e86-41f0-9f76-21f41716dcbd"
+      },
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/html": [
+              "<table class=\"dataframe\">\n",
+              "<caption>A data.frame: 6 × 3</caption>\n",
+              "<thead>\n",
+              "\t<tr><th></th><th scope=col>age</th><th scope=col>x</th><th scope=col>c</th></tr>\n",
+              "\t<tr><th></th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th></tr>\n",
+              "</thead>\n",
+              "<tbody>\n",
+              "\t<tr><th scope=row>1</th><td>121.9412</td><td>117.77238</td><td>507.0636</td></tr>\n",
+              "\t<tr><th scope=row>2</th><td>196.3965</td><td> 89.34600</td><td>464.4298</td></tr>\n",
+              "\t<tr><th scope=row>3</th><td>113.8420</td><td>150.79316</td><td>497.6648</td></tr>\n",
+              "\t<tr><th scope=row>4</th><td>143.6565</td><td> 71.81062</td><td>266.2269</td></tr>\n",
+              "\t<tr><th scope=row>5</th><td>199.4166</td><td>131.47754</td><td>586.1434</td></tr>\n",
+              "\t<tr><th scope=row>6</th><td>115.1774</td><td> 45.78616</td><td>404.8090</td></tr>\n",
+              "</tbody>\n",
+              "</table>\n"
+            ],
+            "text/markdown": "\nA data.frame: 6 × 3\n\n| <!--/--> | age &lt;dbl&gt; | x &lt;dbl&gt; | c &lt;dbl&gt; |\n|---|---|---|---|\n| 1 | 121.9412 | 117.77238 | 507.0636 |\n| 2 | 196.3965 |  89.34600 | 464.4298 |\n| 3 | 113.8420 | 150.79316 | 497.6648 |\n| 4 | 143.6565 |  71.81062 | 266.2269 |\n| 5 | 199.4166 | 131.47754 | 586.1434 |\n| 6 | 115.1774 |  45.78616 | 404.8090 |\n\n",
+            "text/latex": "A data.frame: 6 × 3\n\\begin{tabular}{r|lll}\n  & age & x & c\\\\\n  & <dbl> & <dbl> & <dbl>\\\\\n\\hline\n\t1 & 121.9412 & 117.77238 & 507.0636\\\\\n\t2 & 196.3965 &  89.34600 & 464.4298\\\\\n\t3 & 113.8420 & 150.79316 & 497.6648\\\\\n\t4 & 143.6565 &  71.81062 & 266.2269\\\\\n\t5 & 199.4166 & 131.47754 & 586.1434\\\\\n\t6 & 115.1774 &  45.78616 & 404.8090\\\\\n\\end{tabular}\n",
+            "text/plain": [
+              "  age      x         c       \n",
+              "1 121.9412 117.77238 507.0636\n",
+              "2 196.3965  89.34600 464.4298\n",
+              "3 113.8420 150.79316 497.6648\n",
+              "4 143.6565  71.81062 266.2269\n",
+              "5 199.4166 131.47754 586.1434\n",
+              "6 115.1774  45.78616 404.8090"
+            ]
+          },
+          "metadata": {}
+        }
+      ],
+      "source": [
+        "sample_size = 100 # How many children in data set?\n",
+        "age_lo = 80     # minimum age, in months\n",
+        "age_hi = 200    # maximum age, in months\n",
+        "beta_xa = 0.5   # amount by which experience changes for increase of one month in age\n",
+        "beta_x0 = -5    # amount of experience when age = 0 (not interpretable, since minimum age for this data is 80 months)\n",
+        "sd_x = 50       # standard dev of gaussian noise term, epsilon_x\n",
+        "beta_ca = 0.8   # amount that comprehension score improves for every increase of one unit in age\n",
+        "beta_cx = 3     # amount that comprehension score improves for every increase of one unit in reading experience\n",
+        "beta_c0 = 10    # comprehension score when reading experience is 0.\n",
+        "sd_c = 85      # standard dev of gaussian noise term, epsilon_c\n",
+        "\n",
+        "simulate_data <- function(sample_size, age_lo, age_hi, beta_xa, beta_x0, sd_x, beta_ca, beta_cx, beta_c0, sd_c) {\n",
+        "        age <- runif(sample_size, min = age_lo, max = age_hi)\n",
+        "\n",
+        "        epsilon_x <- rnorm(sample_size, mean = 0, sd = sd_x)\n",
+        "        x <- beta_x0 + beta_xa * age + epsilon_x\n",
+        "\n",
+        "       epsilon_c <- rnorm(sample_size, mean = 0, sd = sd_c)\n",
+        "       c <- beta_c0 + beta_ca * age + beta_cx * x + epsilon_c\n",
+        "\n",
+        "      return(data.frame(age=age,x=x,c=c)) # it's actually bad form to have a variable named \"c\" in R, my bad...\n",
+        "}\n",
+        "\n",
+        "\n",
+        "dat <- simulate_data(sample_size, age_lo, age_hi, beta_xa, beta_x0, sd_x, beta_ca, beta_cx, beta_c0, sd_c)\n",
+        "head(dat)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "T3b3_KsHk-xD"
+      },
+      "source": [
+        "---\n",
+        "## 2. `run_analysis()` function (2 pts)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "TJyPIaTO8zCS"
+      },
+      "source": [
+        "Last week, we looked at whether word reading experience(`x`) mediated the relation between `age` and reading comprehension (`c`).\n",
+        "\n",
+        "Now we're going to use our `simulate_data()` function to conduct a power analysis. The goal is to determine how many participants we would need in order to detect both the mediated and the direct effects in this data.\n",
+        "\n",
+        "*Note: We're going to pretend for the sake of simplicity that we don't have any control over the ages of the children we get (so ages are generated using `runif(sample_size, age_lo, age_hi)`, although of course this would be an unusual situation in reality.*\n",
+        "\n",
+        "First, write a function, `run_analysis()`, that takes in simulated data, runs **your mediation from last week**, and returns a vector containing the ACME and ADE estimates and p-values (these are the `d0`, `d0.p`, `z0`, and `z0.p` features of the mediated model object, e.g., `fitMed$d0.p`). Print this function's output for the data we simulated previously."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 8,
+      "metadata": {
+        "id": "AidH_KidrX9L",
+        "scrolled": true,
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "c4d19efe-bf75-4666-c5eb-2d3618537361"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "     ACME    ACME_p       ADE     ADE_p \n",
+            "1.6414680 0.0020000 0.5530051 0.0180000 \n"
+          ]
+        }
+      ],
+      "source": [
+        "library(mediation)\n",
+        "\n",
+        "run_analysis <- function(data) {\n",
+        "  # Fit mediator model: x ~ age\n",
+        "  med_model <- lm(x ~ age, data = data)\n",
+        "\n",
+        "  # Fit outcome model: comp ~ x + age\n",
+        "  out_model <- lm(c ~ x + age, data = data)\n",
+        "\n",
+        "  # Run mediation analysis\n",
+        "  fitMed <- mediate(med_model, out_model, treat = \"age\", mediator = \"x\",\n",
+        "                    boot = TRUE, sims = 1000)\n",
+        "\n",
+        "  # Extract ACME and ADE estimates and p-values\n",
+        "  acme <- fitMed$d0\n",
+        "  acme_p <- fitMed$d0.p\n",
+        "  ade <- fitMed$z0\n",
+        "  ade_p <- fitMed$z0.p\n",
+        "\n",
+        "  return(c(ACME = acme, ACME_p = acme_p, ADE = ade, ADE_p = ade_p))\n",
+        "}\n",
+        "\n",
+        "\n",
+        "analysis_result <- run_analysis(dat)\n",
+        "print(analysis_result)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bHxz5W2r5s79"
+      },
+      "source": [
+        "---\n",
+        "## 3. `repeat_analysis()` function (3 pts)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "G_jvc1XQBCpH"
+      },
+      "source": [
+        "Next fill in the function `repeat_analysis()` below so that it simulates and analyzes data `num_simulations` times. Store the outputs from each simulation in the `simouts` matrix. Calculate and return the coverage across all the simulations run for both ACME and ADE."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 14,
+      "metadata": {
+        "id": "NheOpBDsBBo9",
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "f5dea34f-f67c-43b8-8cad-6800565949ab"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "$ACME_cov\n",
+            "[1] 0.8\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.8\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "repeat_analysis <- function(num_simulations, alpha, sample_size, age_lo, age_hi,\n",
+        "        beta_xa, beta_x0, sd_x, beta_ca, beta_cx, beta_c0, sd_c) {\n",
+        "    # Initialize simouts matrix for storing each output from run_analysis()\n",
+        "    simouts <- matrix(rep(NA, num_simulations*4), nrow=num_simulations, ncol=4)\n",
+        "\n",
+        "    # Start simulating\n",
+        "    for (i in 1:num_simulations) {\n",
+        "    simdata <- simulate_data(sample_size, age_lo, age_hi, beta_xa, beta_x0, sd_x,\n",
+        "                             beta_ca, beta_cx, beta_c0, sd_c)\n",
+        "    simouts[i, ] <- run_analysis(simdata)\n",
+        "  }\n",
+        "\n",
+        "    # Calculate coverage for both ACME and ADE estimates using p-values in simouts\n",
+        "    ACME_cov = mean(simouts[, 2] < alpha, na.rm = TRUE)\n",
+        "    ADE_cov = mean(simouts[, 4] < alpha, na.rm = TRUE)\n",
+        "\n",
+        "    return(list(ACME_cov = ACME_cov, ADE_cov = ADE_cov))\n",
+        "}\n",
+        "\n",
+        "results <- repeat_analysis(\n",
+        "  num_simulations = 10,\n",
+        "  alpha = 0.01,\n",
+        "  sample_size = 100,\n",
+        "  age_lo = 80,\n",
+        "  age_hi = 200,\n",
+        "  beta_xa = 0.5,\n",
+        "  beta_x0 = -5,\n",
+        "  sd_x = 50,\n",
+        "  beta_ca = 0.8,\n",
+        "  beta_cx = 3,\n",
+        "  beta_c0 = 10,\n",
+        "  sd_c = 85\n",
+        ")\n",
+        "\n",
+        "print(results)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bM5J5pYyQoRL"
+      },
+      "source": [
+        "Now run the `repeat_analysis()` function using the same parameter settings as above, for 10 simulations, with an alpha criterion of 0.01."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 15,
+      "metadata": {
+        "id": "RpURGbZQQlEK",
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "3b7e623a-cbf0-4ebd-98bd-448ec592cbff"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "$ACME_cov\n",
+            "[1] 1\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.6\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "set.seed(123)\n",
+        "\n",
+        "\n",
+        "result <- repeat_analysis(\n",
+        "  num_simulations = 10,\n",
+        "  alpha = 0.01,\n",
+        "  sample_size = 100,\n",
+        "  age_lo = 80,\n",
+        "  age_hi = 200,\n",
+        "  beta_xa = 0.5,\n",
+        "  beta_x0 = -5,\n",
+        "  sd_x = 50,\n",
+        "  beta_ca = 0.8,\n",
+        "  beta_cx = 3,\n",
+        "  beta_c0 = 10,\n",
+        "  sd_c = 85\n",
+        ")\n",
+        "\n",
+        "\n",
+        "print(result)\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "imIoN4w65s7_"
+      },
+      "source": [
+        "---\n",
+        "## 4. Testing different sample sizes (2 pts)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CzeTaoY7SaXv"
+      },
+      "source": [
+        "Finally, do the same thing (10 simulations, alpha criterion of 0.01) but for 5 different sample sizes: 50, 75, 100, 125, 150. You can do this using `map` (as in the tutorial), or a simple `for` loop, or by calculating each individually. Up to you! This should take around 3 minutes to run."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 16,
+      "metadata": {
+        "id": "mp-a19XsS8Md",
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "dc029fce-7980-4aa0-d5bc-a1e812b7b7be"
+      },
+      "outputs": [
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Running simulations for sample size: 50 \n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Running simulations for sample size: 75 \n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Running simulations for sample size: 100 \n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Running simulations for sample size: 125 \n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stderr",
+          "output_type": "stream",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        },
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Running simulations for sample size: 150 \n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n",
+            "Running nonparametric bootstrap\n",
+            "\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "sample_sizes <- c(50, 75, 100, 125, 150)\n",
+        "\n",
+        "results_list <- list()\n",
+        "\n",
+        "set.seed(123)\n",
+        "\n",
+        "# Loop\n",
+        "for (s in sample_sizes) {\n",
+        "  cat(\"Running simulations for sample size:\", s, \"\\n\")\n",
+        "\n",
+        "  result <- repeat_analysis(\n",
+        "    num_simulations = 10,\n",
+        "    alpha = 0.01,\n",
+        "    sample_size = s,\n",
+        "    age_lo = 80,\n",
+        "    age_hi = 200,\n",
+        "    beta_xa = 0.5,\n",
+        "    beta_x0 = -5,\n",
+        "    sd_x = 50,\n",
+        "    beta_ca = 0.8,\n",
+        "    beta_cx = 3,\n",
+        "    beta_c0 = 10,\n",
+        "    sd_c = 85\n",
+        "  )\n",
+        "\n",
+        "  results_list[[as.character(s)]] <- result\n",
+        "}\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "akJwKCB7dkDw"
+      },
+      "source": [
+        "Print your results."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 17,
+      "metadata": {
+        "id": "gIkkWTG2aR4d",
+        "scrolled": true,
+        "vscode": {
+          "languageId": "r"
+        },
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "484af8cb-f439-4e90-aaf6-78c7feaf59f7"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Sample size: 50 \n",
+            "$ACME_cov\n",
+            "[1] 0.6\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.3\n",
+            "\n",
+            "\n",
+            "Sample size: 75 \n",
+            "$ACME_cov\n",
+            "[1] 0.7\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.4\n",
+            "\n",
+            "\n",
+            "Sample size: 100 \n",
+            "$ACME_cov\n",
+            "[1] 0.8\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.6\n",
+            "\n",
+            "\n",
+            "Sample size: 125 \n",
+            "$ACME_cov\n",
+            "[1] 1\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.9\n",
+            "\n",
+            "\n",
+            "Sample size: 150 \n",
+            "$ACME_cov\n",
+            "[1] 1\n",
+            "\n",
+            "$ADE_cov\n",
+            "[1] 0.9\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "\n",
+        "for (s in names(results_list)) {\n",
+        "  cat(\"\\nSample size:\", s, \"\\n\")\n",
+        "  print(results_list[[s]])\n",
+        "}\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "q3Oo6npB5s8B"
+      },
+      "source": [
+        "## 5. Reflection (2 pts)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "tpbGkul2dr-5"
+      },
+      "source": [
+        "If this were a real power analysis, we'd want to run more simulations per sample size (to get a more precise estimate of power) and we may also want to test out some other values of the parameters we used to simulate our data. However, what would you conclude just based on the results above?\n",
+        "\n",
+        "> We reach 0.80 ACME at 100 subjects and 1.00 by 125 subjects which means 125 is when we reach full power to detect the mediation effect, but 100 is sufficient. ADE grows more slowly and thus we need at least 125 participants to meet the conventional 0.80 power threshold. Therefore, overall we would need 125 participants to detect a mediation effect and direct effect with high power.\n",
+        "\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "RcCo3QOifUi5"
+      },
+      "source": [
+        "**Given** how we generated the data, why was the direct effect harder to detect than the mediated effect?\n",
+        "> The direct effect was harder to detect because it was smaller in magnitude than the mediated effect, and its path has more unexplained variance. In contrast, the mediated effect benefited from two potentially strong paths (age → x and x → c), making it more detectable, even at smaller sample sizes."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "C4MPECMmZXqe"
+      },
+      "source": [
+        "**DUE:** 5pm EST, April 3, 2024"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "r9GUofXN4BVy"
+      },
+      "source": [
+        "**IMPORTANT** Did you collaborate with anyone on this assignment? If so, list their names here.\n",
+        "> *Someone's Name*"
+      ]
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "display_name": "R",
+      "language": "R",
+      "name": "ir"
+    },
+    "language_info": {
+      "codemirror_mode": "r",
+      "file_extension": ".r",
+      "mimetype": "text/x-r-source",
+      "name": "R",
+      "pygments_lexer": "r",
+      "version": "4.2.0"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
